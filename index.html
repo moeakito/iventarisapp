@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Inventaris Minimalis</title>
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #171717;
+            --text-muted: #737373;
+            --border: #e5e5e5;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --warning-bg: #fef3c7;
+            --radius: 6px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 3rem 2rem;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 1024px;
+            width: 100%;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+        .toolbar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        input, select, button {
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-family: inherit;
+            outline: none;
+            background: var(--surface);
+        }
+        input:focus, select:focus {
+            border-color: var(--text-main);
+        }
+        button {
+            background-color: var(--text-main);
+            color: white;
+            cursor: pointer;
+            border: 1px solid var(--text-main);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        button:hover { 
+            background-color: transparent;
+            color: var(--text-main);
+        }
+        .btn-outline {
+            background-color: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+        .btn-outline:hover { border-color: var(--text-main); }
+        table {
+            width: 100%;
+            background: var(--surface);
+            border-collapse: collapse;
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+            border: 1px solid var(--border);
+        }
+        th, td {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            font-weight: 500;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            background-color: var(--bg);
+        }
+        td { font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .badge-warning {
+            background-color: var(--warning-bg);
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .actions button {
+            padding: 0.35rem 0.75rem;
+            font-size: 0.75rem;
+        }
+        .btn-delete {
+            background-color: white;
+            color: var(--danger);
+            border: 1px solid var(--border);
+        }
+        .btn-delete:hover {
+            border-color: var(--danger);
+            background-color: #fef2f2;
+        }
+        .mono {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sistem Inventaris.</h1>
+            <button>+ Tambah Barang</button>
+        </header>
+
+        <div class="toolbar">
+            <input type="text" id="searchInput" placeholder="Cari kode atau nama barang..." style="flex: 1; min-width: 250px;">
+            <select id="sortSelect">
+                <option value="">Urutkan berdasarkan...</option>
+                <option value="name">Nama (A-Z)</option>
+                <option value="stock">Stok Terendah</option>
+                <option value="price">Harga Tertinggi</option>
+            </select>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Kode</th>
+                    <th>Nama Barang</th>
+                    <th>Kategori</th>
+                    <th>Stok</th>
+                    <th>Harga</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Data Mockup untuk demo (Array of Objects)
+        const inventoryData = [
+            { id: "BRG-001", name: "Mikroskop Binokuler", category: "Alat Lab", stock: 12, price: 3500000 },
+            { id: "BRG-002", name: "Gelas Kimia 250ml", category: "Bahan Habis Pakai", stock: 45, price: 45000 },
+            { id: "BRG-003", name: "Cawan Petri Kaca", category: "Alat Lab", stock: 4, price: 25000 },
+            { id: "BRG-004", name: "Jas Laboratorium", category: "Perlengkapan", stock: 8, price: 180000 },
+            { id: "BRG-005", name: "Pipet Tetes", category: "Bahan Habis Pakai", stock: 3, price: 15000 }
+        ];
+
+        // Fungsi format Rupiah
+        const formatRupiah = (angka) => {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+        };
+
+        // Fungsi render tabel
+        const renderTable = (data) => {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            data.forEach(item => {
+                const isLowStock = item.stock <= 5; // Logika peringatan stok minimum
+                const stockDisplay = isLowStock 
+                    ? `<span class="badge badge-warning">${item.stock} (Stok Menipis)</span>` 
+                    : item.stock;
+
+                const row = `
+                    <tr>
+                        <td class="mono">${item.id}</td>
+                        <td style="font-weight: 500;">${item.name}</td>
+                        <td style="color: var(--text-muted);">${item.category}</td>
+                        <td>${stockDisplay}</td>
+                        <td>${formatRupiah(item.price)}</td>
+                        <td class="actions">
+                            <button class="btn-outline">Edit</button>
+                            <button class="btn-delete">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        };
+itaiiiafsdsa
+
+
+
+
+asaasadasa
+        // Render awal saat halaman dimuat
+        renderTable(inventoryData);
+
+        // Fitur Pencarian (Searching Algorithm - Linear)
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const keyword = e.target.value.toLowerCase();
+            const filteredData = inventoryData.filter(item => 
+                item.name.toLowerCase().includes(keyword) || 
+                item.id.toLowerCase().includes(keyword)
+            );
+            renderTable(filteredData);
+        });
+
+        // Fitur Pengurutan dummy untuk visualisasi antarmuka
+        document.getElementById('sortSelect').addEventListener('change', (e) => {
+            console.log("Sorting action triggered: " + e.target.value);
+            // Implementasi sorting array bisa ditambahkan di sini
+        });
+    </script>
+</body>
+</html>
